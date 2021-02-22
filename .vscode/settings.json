@@ -12,6 +12,9 @@
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true,
-    "**/*~": true
+    "**/*~": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 2000,
+
   }
 }
