@@ -4,24 +4,30 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.SPI;
+import static java.lang.Math.IEEEremainder;
 
+import edu.wpi.first.wpilibj.SPI;
+import static frc.robot.Constants.*;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
 public class DriveSubsystem extends SubsystemBase {
   
-  private final WPI_TalonFX leftMaster = new WPI_TalonFX(Constants.LEFT_MASTER_ID);
-  private final WPI_TalonFX rightMaster = new WPI_TalonFX(Constants.RIGHT_MASTER_ID);
-  private final WPI_TalonFX rightSlave = new WPI_TalonFX(Constants.RIGHT_SLAVE_ID);
-  private final WPI_TalonFX leftSlave = new WPI_TalonFX(Constants.LEFT_SLAVE_ID);
+  private final WPI_TalonFX leftMaster = new WPI_TalonFX(CanIdConstants.LEFT_MASTER_ID);
+  private final WPI_TalonFX rightMaster = new WPI_TalonFX(CanIdConstants.RIGHT_MASTER_ID);
+  private final WPI_TalonFX rightSlave = new WPI_TalonFX(CanIdConstants.RIGHT_SLAVE_ID);
+  private final WPI_TalonFX leftSlave = new WPI_TalonFX(CanIdConstants.LEFT_SLAVE_ID);
 
   private final DifferentialDrive differentialDrive = new DifferentialDrive(leftMaster, rightMaster);
+
+  private final SupplyCurrentLimitConfiguration currentLimit = new SupplyCurrentLimitConfiguration
+  (true, 40, 60, 1);
 
   private final ADXRS450_Gyro gyro  = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
@@ -29,8 +35,21 @@ public class DriveSubsystem extends SubsystemBase {
     rightSlave.follow(rightMaster);
     leftSlave.follow(leftMaster);
 
+    leftMaster.configSupplyCurrentLimit(currentLimit);
+    rightMaster.configSupplyCurrentLimit(currentLimit);
+    leftSlave.configSupplyCurrentLimit(currentLimit);
+    rightSlave.configSupplyCurrentLimit(currentLimit);
+
+    leftMaster.setNeutralMode(NeutralMode.Brake);
+    rightMaster.setNeutralMode(NeutralMode.Brake);
+    leftSlave.setNeutralMode(NeutralMode.Brake);
+    rightSlave.setNeutralMode(NeutralMode.Brake);
+
     leftMaster.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 10);
     rightMaster.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 10);
+
+    resetEncoders();
+    resetGyro();
 
   }
 
@@ -40,6 +59,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void gyroAngle(){
     gyro.getAngle();
+  }
+
+  public double getHeading(){
+    return IEEEremainder(gyro.getAngle(), 360) * 
+    (DriveConstants.IS_GYRO_REVERSED_FOR_PATHWEAVER ? -1.0 : 1.0);
   }
 
   public void calibrateGyro(){
@@ -53,6 +77,36 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetEncoders(){
     leftMaster.setSelectedSensorPosition(0, 0, 10);
     rightMaster.setSelectedSensorPosition(0, 0, 10);
+  }
+
+  public double getAverageDistance(){
+    return ((getLeftWheelPosition() + getRightWheelPosition()) / 2);
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds(){
+    return new DifferentialDriveWheelSpeeds(getLeftWheelSpeed(), getRightWheelSpeed());
+  }
+
+  private double getLeftWheelPosition(){
+    return (leftMaster.getSelectedSensorPosition() * DriveConstants.WHEEL_CIRCUMFERENCE_METERS/ 
+    DriveConstants.TALONFX_ENCODER_CPR)
+    / DriveConstants.GEAR_RATIO;
+  }
+
+  private double getRightWheelPosition(){
+    return (rightMaster.getSelectedSensorPosition() * DriveConstants.WHEEL_CIRCUMFERENCE_METERS/ 
+    DriveConstants.TALONFX_ENCODER_CPR)
+    / DriveConstants.GEAR_RATIO;
+  }
+
+  private double getLeftWheelSpeed(){
+    return leftMaster.getSelectedSensorVelocity(0) * 10 / DriveConstants.TALONFX_ENCODER_CPR / 
+    DriveConstants.GEAR_RATIO * DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
+  }
+
+  private double getRightWheelSpeed(){
+    return rightMaster.getSelectedSensorVelocity(0) * 10 / DriveConstants.TALONFX_ENCODER_CPR / 
+    DriveConstants.GEAR_RATIO * DriveConstants.WHEEL_CIRCUMFERENCE_METERS;
   }
   
   @Override
