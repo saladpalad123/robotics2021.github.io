@@ -3,28 +3,45 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 import static frc.robot.Constants.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import frc.robot.Constants.XboxControllerConstants;
 import frc.robot.commands.AutoCommand;
+import frc.robot.commands.ElevatorDownCommand;
+import frc.robot.commands.ElevatorUpCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+
+  private final ElevatorUpCommand elevatorUpCommand = new ElevatorUpCommand(elevatorSubsystem);
+  private final ElevatorDownCommand elevatorDownCommand = new ElevatorDownCommand(elevatorSubsystem);
 
   private final AutoCommand autoCommand = new AutoCommand();
+
   final XboxController driverController = new XboxController(USBConstants.DRIVER_CONTROLLER_PORT);
+  
   
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    configureButtonBindings();
 
-    driveSubsystem.setDefaultCommand(new RunCommand(() -> {driveSubsystem.arcadeDrive(
+    private void calibrate() {
+      System.out.println("Gyro is calibrating...");
+      driveSubsystem.calibrateGyro();
+      }
+      
+    configureButtonBindings();
+       driveSubsystem.setDefaultCommand(new RunCommand(() -> {driveSubsystem.arcadeDrive(
       -driverController.getY(GenericHID.Hand.kLeft), 
       driverController.getX(GenericHID.Hand.kRight));
     }, driveSubsystem));
@@ -38,7 +55,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    new JoystickButton(driverController, XboxControllerConstants.LB_BUTTON).whileHeld(elevatorDownCommand);
+    new JoystickButton (driverController, XboxControllerConstants.RB_BUTTON).whileHeld(elevatorUpCommand);
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -47,6 +67,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An  will run in autonomous
-    return autoCommand;
+    return new ElevatorDownCommand(elevatorSubsystem);
   }
 }

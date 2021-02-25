@@ -18,7 +18,7 @@ public final class Constants {
 		public static final int AUXDRIVER_CONTROLLER_PORT = 1;
 	}
 
-	public static final class XboxController {
+	public static final class XboxControllerConstants {
 
 		// Button mappings
 		static public int D_PAD = 0;
