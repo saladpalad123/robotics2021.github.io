@@ -7,9 +7,8 @@ package frc.robot;
 import static frc.robot.Constants.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.XboxControllerConstants;
-import frc.robot.commands.AutoCommand;
 import frc.robot.commands.ElevatorDownCommand;
 import frc.robot.commands.ElevatorUpCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -25,27 +24,25 @@ public class RobotContainer {
   private final ElevatorUpCommand elevatorUpCommand = new ElevatorUpCommand(elevatorSubsystem);
   private final ElevatorDownCommand elevatorDownCommand = new ElevatorDownCommand(elevatorSubsystem);
 
-  private final AutoCommand autoCommand = new AutoCommand();
-
   final XboxController driverController = new XboxController(USBConstants.DRIVER_CONTROLLER_PORT);
   
-  
+  private void calibrate() {
+      System.out.println("Gyro is calibrating...");
+      driveSubsystem.calibrateGyro();
+      }
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    private void calibrate() {
-      System.out.println("Gyro is calibrating...");
-      driveSubsystem.calibrateGyro();
-      }
+    calibrate();
       
     configureButtonBindings();
-       driveSubsystem.setDefaultCommand(new RunCommand(() -> {driveSubsystem.arcadeDrive(
-      -driverController.getY(GenericHID.Hand.kLeft), 
-      driverController.getX(GenericHID.Hand.kRight));
-    }, driveSubsystem));
-
+       driveSubsystem.setDefaultCommand(new RunCommand(() -> {
+         driveSubsystem.arcadeDrive(
+          -driverController.getY(GenericHID.Hand.kLeft), 
+          driverController.getX(GenericHID.Hand.kRight));
+        }, driveSubsystem));
 
   }
 
@@ -56,6 +53,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // final Button a = new JoystickButton(driverController, XboxControllerConstants.A_BUTTON);
     new JoystickButton(driverController, XboxControllerConstants.LB_BUTTON).whileHeld(elevatorDownCommand);
     new JoystickButton (driverController, XboxControllerConstants.RB_BUTTON).whileHeld(elevatorUpCommand);
   }
