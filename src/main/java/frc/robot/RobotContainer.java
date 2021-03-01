@@ -7,13 +7,17 @@ package frc.robot;
 import static frc.robot.Constants.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+
 import frc.robot.commands.AutoAimCommand;
+
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
 import frc.robot.commands.ElevatorDownCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.utils.Vision;
 import edu.wpi.first.wpilibj2.command.button.Button;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -32,12 +36,11 @@ public class RobotContainer {
   private final StartEndCommand elevatorDownCommand = new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.25), () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
   private final StartEndCommand elevatorUpCommand = new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.25), () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
 
-
   
   private void calibrate() {
-    System.out.println("Gyro is calibrating...");
-    driveSubsystem.calibrateGyro();
-    }
+      System.out.println("Gyro is calibrating...");
+      driveSubsystem.calibrateGyro();
+      }
 
     public DriveSubsystem getDriveSubsystem(){
       return driveSubsystem;
@@ -52,6 +55,16 @@ public class RobotContainer {
       driveSubsystem.arcadeDrive(
       -driverController.getY(GenericHID.Hand.kLeft), 
       driverController.getX(GenericHID.Hand.kRight));
+    }, driveSubsystem));
+
+
+    calibrate();
+      
+    configureButtonBindings();
+    driveSubsystem.setDefaultCommand(new RunCommand(() -> {
+      driveSubsystem.arcadeDrive(
+        -driverController.getY(GenericHID.Hand.kLeft), 
+        driverController.getX(GenericHID.Hand.kRight));
     }, driveSubsystem));
 
 
@@ -70,6 +83,8 @@ public class RobotContainer {
     lb.whileHeld(elevatorDownCommand);
     rb.whileHeld(elevatorUpCommand);
 
+
+  
   }
 
   /**
