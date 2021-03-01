@@ -9,16 +9,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
-
 public final class Constants {
-
-	public static final class USBConstants {
+	public static final class UsbConstants {
 		public static final int DRIVER_CONTROLLER_PORT = 0;
 		public static final int AUXDRIVER_CONTROLLER_PORT = 1;
 	}
-
-	public static final class XboxControllerConstants {
+	public static final class XboxConstants {
 
 		// Button mappings
 		static public int D_PAD = 0;
@@ -53,7 +49,7 @@ public final class Constants {
 
 	}
 
-	public static final class PS4Controller {
+	public static final class PS4Constants {
 
 		static public int X_BUTTON = 1;
 		static public int O_BUTTON = 2;
@@ -62,7 +58,7 @@ public final class Constants {
 
 	}
 
-	public static final class LogitecController {
+	public static final class LogitechConstants {
 
 		public static final int ONE_BUTTON = 1;
 		public static final int TWO_BUTTON = 2;
@@ -82,21 +78,12 @@ public final class Constants {
 		public static final double GEAR_RATIO = 11.25; // 12:50 => 20:54 on a falconfx gives 14.8 fps. Driven/Driver
 		public static final double WHEEL_DIAMETER_METERS = 0.15875;
 		public static final double WHEEL_CIRCUMFERENCE_METERS = Math.PI * WHEEL_DIAMETER_METERS;
-		public static final double RAMSETE_B = 2.0;
-		public static final double RAMSETE_ZETA = 0.7;
-		public static final double MAX_METERS_PER_SECOND = 0.25;
-		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.2;
-		public static final double MAX_VOLTAGE_AUTO = 10;
-		public static final double STARTING_POSE_X = 12.8;
-		public static final double STARTING_POSE_Y = -5.8;
-		public static boolean IS_GYRO_REVERSED_FOR_PATHWEAVER = true;
-		public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
-				TRACK_WIDTH_METERS);
-		public static final SimpleMotorFeedforward SIMPLE_MOTOR_FEED_FOWARD = new SimpleMotorFeedforward(
-				PidConstants.KS_FEEDFOWARD, PidConstants.KV_FEEDFOWARD, PidConstants.KA_FEEDFOWARD);
+		public static final int TIMEOUT = 50;
+		
 	}
 
 	public static final class CanIdConstants {
+
 		public static final int LEFT_MASTER_ID = 1;
 		public static final int LEFT_SLAVE_ID = 2;
 		public static final int RIGHT_MASTER_ID = 3;
@@ -112,36 +99,36 @@ public final class Constants {
 
 	}
 
-	public static final class PidConstants {
-		public static final double KS_FEEDFOWARD = 1.2;
-		public static final double KV_FEEDFOWARD = 0.329;
-		public static final double KA_FEEDFOWARD = 0.0933;
-		public static final double OPTIMAL_KP = 4;
-		public static final double OPTIMAL_KD = 4.51;
+	public static final class TrajectoryConstants {
+
+		public static final double KS = 1.2;
+		public static final double KV = 0.329;
+		public static final double KA = 0.0933;
+		public static final double KP = 8.5;
+
+		public static final double RAMSETE_B = 2.0;
+		public static final double RAMSETE_ZETA = 0.7;
+
+		public static final double MAX_VELOCITY = 0.25;
+		public static final double MAX_ACCELERATION = 0.2;
+		
+		public static final double STARTING_POSE_X = 0;
+		public static final double STARTING_POSE_Y = 0;
+		public static final boolean IS_GYRO_REVERSED_FOR_PATHWEAVER = true;
+
+		public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
+				DriveConstants.TRACK_WIDTH_METERS);
+				
+		public static final SimpleMotorFeedforward SIMPLE_MOTOR_FEED_FOWARD = new SimpleMotorFeedforward(
+			TrajectoryConstants.KS, TrajectoryConstants.KV, TrajectoryConstants.KA);
+
 	}
 
 	public static final class AutoAimConstants {
-		public static final double KP_ROTATION_AUTOAIM = 0.025;
-		public static final double KD_ROTATION_AUTOAIM = 0.0006;
-		public static final double ANGLE_TOLERANCE = 1.0; // IN DEGREES
-	}
-
-	public static final class VoltageConstants {
-		public static final double STOP = 0;
-		public static final double INDEX_WHEEL_SPEED = 1.0;
-		public static final double ELEVATOR_DOWN_VOLTAGE = -1.0;
-		public static final double ELEVATOR_UP_VOLTAGE = 3.0;
-		public static final double INTAKE_GATE_DOWN = 1.5;
-		public static final double INTAKE_GATE_UP_VOLTAGE = -4.5;
-		public static final double WINCH_DOWN_VOLTAGE = -4.0;
-		public static final double WINCH_UP_VOLTAGE = 11.5;
-		public static final double INTAKE_WHEEL_SPEED_OUT = .5;
-		public static final double INTAKE_WHEEL_SPEED_IN = .45;
-		public static final DifferentialDriveVoltageConstraint autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-				DriveConstants.SIMPLE_MOTOR_FEED_FOWARD, DriveConstants.DRIVE_KINEMATICS,
-				DriveConstants.MAX_VOLTAGE_AUTO);
-		public static final double TURN_VOLTAGE_COMPENSATION_VOLTS = 5;
-
+		public static final String CAMERA_NAME	= "photonvision";
+		public static final double KI = 0;
+		public static final double KD = 0;
+		public static final double KP = 0;
 	}
 
 }

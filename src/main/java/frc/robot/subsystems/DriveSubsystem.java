@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import static java.lang.Math.IEEEremainder;
 
 import edu.wpi.first.wpilibj.SPI;
 import static frc.robot.Constants.*;
@@ -62,8 +61,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getHeading(){
-    return IEEEremainder(gyro.getAngle(), 360) * 
-    (DriveConstants.IS_GYRO_REVERSED_FOR_PATHWEAVER ? -1.0 : 1.0);
+    return gyro.getRotation2d().getDegrees();
   }
 
   public void calibrateGyro(){
