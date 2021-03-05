@@ -4,17 +4,23 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import static frc.robot.Constants.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.commands.AutoAimCommand;
 
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
-import frc.robot.commands.ElevatorDownCommand;
+
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.utils.FourMeterAuto;
+import frc.robot.utils.ThreeMeterAuto;
 import frc.robot.utils.Vision;
 import edu.wpi.first.wpilibj2.command.button.Button;
 
@@ -23,18 +29,32 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+  final XboxController driverController = new XboxController(UsbConstants.DRIVER_CONTROLLER_PORT);
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-
+  private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
  
 
   private final Vision vision = new Vision();
-  final XboxController driverController = new XboxController(UsbConstants.DRIVER_CONTROLLER_PORT);
+  private final ThreeMeterAuto threeMeterAuto = new ThreeMeterAuto(driveSubsystem);
+  private final FourMeterAuto fourMeterAuto = new FourMeterAuto(driveSubsystem);
 
-  private final AutoAimCommand autoAimCommand = new AutoAimCommand(vision, driveSubsystem, () -> -driverController.getY(GenericHID.Hand.kLeft));
-  private final StartEndCommand elevatorDownCommand = new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.25), () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
-  private final StartEndCommand elevatorUpCommand = new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.25), () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
+  private final SendableChooser<Command> chooser = new SendableChooser<>();
+
+  private final AutoAimCommand autoAimCommand = new AutoAimCommand
+  (vision, driveSubsystem, () -> -driverController.getY(GenericHID.Hand.kLeft));
+
+  private final StartEndCommand elevatorDownCommand = new StartEndCommand
+  (() -> elevatorSubsystem.setElevatorSpeed(-.25), 
+  () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
+
+  private final StartEndCommand elevatorUpCommand = new StartEndCommand
+  (() -> elevatorSubsystem.setElevatorSpeed(.25), 
+  () -> elevatorSubsystem.setElevatorSpeed(0), elevatorSubsystem);
+
+  private final StartEndCommand shootCommand = new StartEndCommand
+    (() -> shooterSubsystem.setSpeed(.25) , 
+    () -> shooterSubsystem.setSpeed(0), shooterSubsystem);
 
   
   private void calibrate() {
@@ -45,10 +65,23 @@ public class RobotContainer {
     public DriveSubsystem getDriveSubsystem(){
       return driveSubsystem;
     }
+    
+    public XboxController getDriverController() {
+      return driverController;
+    }
+
+    private void shuffleboardSetup(){
+      final ShuffleboardTab tab = Shuffleboard.getTab("Auto");
+
+      tab.add("Select program for auto", chooser);
+      chooser.setDefaultOption("3 meter", threeMeterAuto.getCommand());
+      chooser.addOption("4 meter", fourMeterAuto.getCommand());
+    }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     calibrate();
+    shuffleboardSetup();
       
     configureButtonBindings();
       driveSubsystem.setDefaultCommand(new RunCommand(() -> {
@@ -79,9 +112,13 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Button lb = new JoystickButton(driverController, XboxConstants.LB_BUTTON);
     Button rb = new JoystickButton(driverController, XboxConstants.RB_BUTTON);
+    Button a = new JoystickButton(driverController, XboxConstants.A_BUTTON);
 
     lb.whileHeld(elevatorDownCommand);
     rb.whileHeld(elevatorUpCommand);
+    a.whenPressed(autoAimCommand);
+    a.whileHeld(shootCommand);
+
 
 
   
@@ -93,7 +130,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An  will run in autonomous
-    return new ElevatorDownCommand(elevatorSubsystem);
+    
+    return new SequentialCommandGroup(
+      chooser.getSelected(), autoAimCommand.withTimeout(2), shootCommand.withTimeout(5));
+    
   }
 }
